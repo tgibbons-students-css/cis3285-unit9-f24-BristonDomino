@@ -21,29 +21,26 @@ namespace SingleResponsibilityPrinciple
 
         public IEnumerable<string> GetTradeData()
         {
-            List<string> tradeData = new List<string>();
-            logger.LogInfo($"Fetching trade data from RESTful API at {url}");
-
-            using (HttpClient client = new HttpClient())
+            return Task.Run(async () =>
             {
-                HttpResponseMessage response = client.GetAsync(url).Result;
-                if (!response.IsSuccessStatusCode)
+                List<string> tradeData = new List<string>();
+                logger.LogInfo("Reading trades from RESTful API: " + url);
+
+                using (HttpClient client = new HttpClient())
                 {
-                    logger.LogWarning($"Failed to retrieve data. Status code: {response.StatusCode}");
-                    throw new Exception($"Failed to retrieve data from URL: {url}");
+                    HttpResponseMessage response = await client.GetAsync(url);
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        logger.LogWarning($"Failed to retrieve data. Status code: {response.StatusCode}");
+                        throw new Exception($"Failed to retrieve data from URL: {url}");
+                    }
+
+                    string jsonContent = await response.Content.ReadAsStringAsync();
+                    tradeData = JsonSerializer.Deserialize<List<string>>(jsonContent);
+
+                    return tradeData;
                 }
-
-                string jsonData = response.Content.ReadAsStringAsync().Result;
-                tradeData = JsonSerializer.Deserialize<List<string>>(jsonData);
-
-                return tradeData;
-            }           
+            }).Result;
         }
-
-
-       // public IEnumerable<string> GetTradeData()
-        //{
-        //    throw new NotImplementedException();
-        //}
     }
 }
