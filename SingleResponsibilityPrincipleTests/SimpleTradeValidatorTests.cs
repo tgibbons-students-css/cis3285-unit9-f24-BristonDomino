@@ -22,6 +22,22 @@ namespace SingleResponsibilityPrinciple.Tests
             Assert.IsTrue(result);
         }
 
+        // added this
+        [TestMethod()]
+        public void TestEmptyCurrencyString()
+        {
+            // Arrange
+            var logger = new ConsoleLogger();
+            var tradeValidator = new SimpleTradeValidator(logger);
+            string[] strData = { "", "1000", "1.00" };
+
+            // Act
+            bool result = tradeValidator.Validate(strData);
+
+            // Assert
+            Assert.IsFalse(result);
+        }
+        
         [TestMethod()]
         public void TestShortCurrencyString()
         {
